@@ -55,11 +55,11 @@ namespace TestAsyncProcessing
 
                 WriteLine(mName, "Sleeping to do async");
 
-                //await Task.Delay(10000);
+                await Task.Delay(10000);
 
-                Thread.Sleep(10000);
+                //Thread.Sleep(10000);
 
-                WriteLine(mName, "Big async operation done. Request terminated. {0} ms since start to complete", Environment.TickCount - mStart);
+                WriteLine(mName, "Big async operation. Request terminated. {0} ms since start to complete", Environment.TickCount - mStart);
             }
 
             void WriteLine(string requestName, string format, params object[] args)
