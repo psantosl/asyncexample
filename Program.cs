@@ -11,61 +11,47 @@ namespace TestAsyncProcessing
     {
         static void Main(string[] args)
         {
-            WorkerThread th = new WorkerThread("worker0");
+            ThreadPool.SetMaxThreads(1, 1);
 
-            Thread t = new Thread(th.Run);
-            t.Start();
+            Task.Factory.StartNew(() =>
+                {
+                    Request t = new Request("req0");
 
-            mQueue.Enqueue("req0");
-            mQueue.Enqueue("req1");
+                    t.ProcessRequest("req0");
+                }
+            );
+
+            Task.Factory.StartNew(() =>
+                {
+                    Request t = new Request("req1");
+
+                    t.ProcessRequest("req1");
+                }
+            );
 
             while (true)
             {
                 Console.WriteLine("Type a name and then ENTER to schedule a new request");
                 string order = Console.ReadLine();
 
-                lock (mLock)
-                {
-                    mQueue.Enqueue(order);
+                Task.Factory.StartNew(() =>
+                    {
+                        Request t = new Request(order);
 
-                    Monitor.Pulse(mLock);
-                }
+                        t.ProcessRequest(order);
+                    }
+                );
             }
         }
 
-        class WorkerThread
+        class Request
         {
-            internal WorkerThread(string name)
+            internal Request(string name)
             {
                 mName = name;
             }
 
-            internal void Run()
-            {
-                WriteLine(mName, "Starting worker thread");
-
-                while (true)
-                {
-                    string order;
-
-                    lock (mLock)
-                    {
-                        if (mQueue.Count == 0)
-                        {
-                            WriteLine(mName, "Sleeping to wait for request to enter");
-                            Monitor.Wait(mLock);
-                        }
-
-                        order = mQueue.Dequeue();
-                    }
-
-                    ProcessRequest(order);
-
-                    WriteLine(mName, "Returning to process loop");
-                }
-            }
-
-            async void ProcessRequest(string name)
+            internal async void ProcessRequest(string name)
             {
                 WriteLine(name, "Starting request");
 
@@ -94,8 +80,5 @@ namespace TestAsyncProcessing
 
             string mName;
         }
-
-        static Queue<string> mQueue = new Queue<string>();
-        static object mLock = new object();
     }
 }
