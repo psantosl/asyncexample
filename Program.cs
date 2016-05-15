@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TestAsyncProcessing
@@ -16,13 +13,16 @@ namespace TestAsyncProcessing
             for (int i = 0; i < 4; ++i)
             {
                 string name = i.ToString();
-                Task.Factory.StartNew(() => { new Request("req" + name).ProcessRequest(); });
+                Task.Factory.StartNew(() =>
+                { new Request("req" + name).ProcessRequest(); });
             }
+
+            Console.WriteLine(
+                "Type a name and then ENTER to schedule a new request");
+            string order = Console.ReadLine();
 
             while (true)
             {
-                Console.WriteLine("Type a name and then ENTER to schedule a new request");
-                string order = Console.ReadLine();
 
                 Task.Factory.StartNew(() =>
                     {
@@ -51,23 +51,34 @@ namespace TestAsyncProcessing
 
                 Thread.Sleep(1000);
 
-                WriteLine(mName, "Done. {0} ms", Environment.TickCount - ini);
+                WriteLine(mName, "Done. {0} ms",
+                    Environment.TickCount - ini);
 
                 WriteLine(mName, "Sleeping to do async");
 
+                // replace await by Thread.Sleep 
+                // to simulate blocking vs async IO
                 await Task.Delay(10000);
 
                 //Thread.Sleep(10000);
 
-                WriteLine(mName, "Big async operation. Request terminated. {0} ms since start to complete", Environment.TickCount - mStart);
+                WriteLine(mName,
+                    "Big async operation. Request terminated."+
+                    " {0} ms since start to complete",
+                    Environment.TickCount - mStart);
             }
 
-            void WriteLine(string requestName, string format, params object[] args)
+            void WriteLine(
+                string requestName,
+                string format,
+                params object[] args)
             {
                 string s = string.Format(format, args);
 
-                Console.WriteLine("{0} - thId - {1} - {2}",
-                    requestName, Thread.CurrentThread.ManagedThreadId, s);
+                Console.WriteLine(
+                    "{0} - thId - {1} - {2}",
+                    requestName,
+                    Thread.CurrentThread.ManagedThreadId, s);
             }
 
             string mName;
