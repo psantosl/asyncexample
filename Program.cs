@@ -14,7 +14,10 @@ namespace TestAsyncProcessing
             ThreadPool.SetMaxThreads(1, 1);
 
             for (int i = 0; i < 4; ++i)
-                Task.Factory.StartNew(() => { new Request("req"+i.ToString()).ProcessRequest(); });
+            {
+                string name = i.ToString();
+                Task.Factory.StartNew(() => { new Request("req" + name).ProcessRequest(); });
+            }
 
             while (true)
             {
@@ -52,9 +55,11 @@ namespace TestAsyncProcessing
 
                 WriteLine(mName, "Sleeping to do async");
 
-                await Task.Delay(10000);
+                //await Task.Delay(10000);
 
-                WriteLine(mName, "Big async operation done. Request terminated: {0} ms", Environment.TickCount - ini);
+                Thread.Sleep(10000);
+
+                WriteLine(mName, "Big async operation done. Request terminated. {0} ms since start to complete", Environment.TickCount - mStart);
             }
 
             void WriteLine(string requestName, string format, params object[] args)
@@ -67,5 +72,7 @@ namespace TestAsyncProcessing
 
             string mName;
         }
+
+        static int mStart = Environment.TickCount;
     }
 }
